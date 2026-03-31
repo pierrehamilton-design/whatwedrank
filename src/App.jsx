@@ -47,6 +47,55 @@ export default function App() {
   const [showForm, setShowForm] = useState(false);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
+  const [recommendation, setRecommendation] = useState("");
+  const [recommending, setRecommending] = useState(false);
+
+  const getSeason = () => {
+    const m = new Date().getMonth();
+    if (m >= 2 && m <= 4) return "spring";
+    if (m >= 5 && m <= 7) return "summer";
+    if (m >= 8 && m <= 10) return "autumn";
+    return "winter";
+  };
+
+  const getRecommendation = async () => {
+    setRecommending(true);
+    setRecommendation("");
+    const loves = allEntries
+      .filter(e => e["Like it or Love it?"] === "Love")
+      .slice(-30)
+      .map(e => `${e.Drink || ""} by ${e["Winery/Brewery"] || ""} (${e.style || e["Whatru Drinking"]})`);
+    const neverAgain = [...new Set(
+      allEntries
+        .filter(e => e["Like it or Love it?"] === "Never Again")
+        .map(e => e.style || e["Whatru Drinking"])
+    )];
+    const season = getSeason();
+    const prompt = `You are a knowledgeable craft beer and natural wine advisor. Based on this person's drink history, suggest ONE specific drink they'd enjoy.
+
+Drinks they loved (most recent first):
+${loves.join("\n")}
+
+Styles to avoid (rated Never Again):
+${neverAgain.join(", ")}
+
+Current season: ${season}
+
+Give a specific recommendation — a real beer, wine, or cider with a brewery/winery name, style, and 2-3 sentences on why it fits their taste and the season. Be confident and specific. No hedging.`;
+
+   const res = await fetch("/api/recommend", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 1000,
+        messages: [{ role: "user", content: prompt }],
+      }),
+    });
+    const data = await res.json();
+    setRecommendation(data.content?.[0]?.text || "Couldn't get a recommendation right now.");
+    setRecommending(false);
+  };
 
   useEffect(() => {
     fetchDrinks().then(data => {
@@ -301,6 +350,24 @@ export default function App() {
                   </div>
                 ))}
               </div>
+            </div>
+            {/* Recommendation */}
+            <div style={{ marginTop: 24, borderTop: "1px solid #2a2018", paddingTop: 24 }}>
+              <div style={{ fontFamily: "'Playfair Display', serif", fontStyle: "italic", fontSize: 13, color: "#8a7a5a", marginBottom: 12 }}>Feeling Adventurous?</div>
+              <button onClick={getRecommendation} disabled={recommending} style={{
+                width: "100%", background: recommending ? "#2a2018" : "#1e1812",
+                color: recommending ? "#6a5a3a" : "#e8785a", border: "1px solid #e8785a44",
+                borderRadius: 4, padding: "12px", fontFamily: "'DM Mono', monospace",
+                fontSize: 12, letterSpacing: 1, cursor: recommending ? "not-allowed" : "pointer",
+                transition: "all 0.2s"
+              }}>
+                {recommending ? "Thinking..." : "♥ Recommend Something"}
+              </button>
+              {recommendation && (
+                <div style={{ marginTop: 12, background: "#1e1812", border: "1px solid #3a2e1e", borderRadius: 4, padding: "16px" }}>
+                  <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 13, color: "#f0e8d8", lineHeight: 1.7 }}>{recommendation}</div>
+                </div>
+              )}
             </div>
           </div>
         )}
