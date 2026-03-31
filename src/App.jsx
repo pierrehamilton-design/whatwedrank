@@ -320,10 +320,24 @@ export default function App() {
                 </div>
               ))}
             </div>
-            {[["Drink Name", "Drink", "e.g. Gee Whiz"], ["Brewery / Winery", "Winery/Brewery", "e.g. Sonnen Hill Brewing"], ["Style", "style", "e.g. Saison"], ["Where", "Where", "e.g. Volo, LCBO, Bottle Shop"]].map(([label, field, ph]) => (
+            {[
+              ["Drink Name", "Drink", "e.g. Gee Whiz", [...new Set(allEntries.map(e => e.Drink).filter(Boolean))].sort()],
+              ["Brewery / Winery", "Winery/Brewery", "e.g. Sonnen Hill Brewing", [...new Set(allEntries.map(e => e["Winery/Brewery"]).filter(Boolean))].sort()],
+              ["Style", "style", "e.g. Saison", [...new Set(allEntries.map(e => e.style).filter(Boolean))].sort()],
+              ["Where", "Where", "e.g. Volo, LCBO, Bottle Shop", [...new Set(allEntries.map(e => e.Where).filter(Boolean))].sort()],
+            ].map(([label, field, ph, suggestions]) => (
               <div key={field} style={{ marginBottom: 10 }}>
                 <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: "#6a5a3a", letterSpacing: 0.5, marginBottom: 4 }}>{label}</div>
-                <input value={form[field]} onChange={e => setForm(f => ({ ...f, [field]: e.target.value }))} placeholder={ph} style={{ width: "100%", background: "#2a2018", border: "1px solid #3a2e1e", borderRadius: 4, padding: "8px 10px", color: "#f0e8d8", fontFamily: "'DM Mono', monospace", fontSize: 12 }} />
+                <input
+                  value={form[field]}
+                  onChange={e => setForm(f => ({ ...f, [field]: e.target.value }))}
+                  placeholder={ph}
+                  list={`list-${field}`}
+                  style={{ width: "100%", background: "#2a2018", border: "1px solid #3a2e1e", borderRadius: 4, padding: "8px 10px", color: "#f0e8d8", fontFamily: "'DM Mono', monospace", fontSize: 12 }}
+                />
+                <datalist id={`list-${field}`}>
+                  {suggestions.map(s => <option key={s} value={s} />)}
+                </datalist>
               </div>
             ))}
             <div style={{ marginBottom: 20 }}>
