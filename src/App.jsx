@@ -76,16 +76,16 @@ export default function App() {
 Drinks they loved (most recent first):
 ${loves.join("\n")}
 
-Styles to avoid (rated Never Again):
-${neverAgain.join(", ")}
-
 Current season: ${season}
 
-Give a specific recommendation — a real beer, wine, or cider with a brewery/winery name, style, and 2-3 sentences on why it fits their taste and the season. Be confident and specific. No hedging.`;
+Respond in exactly this format:
+Line 1: The drink name, brewery/winery, and style only
+Line 2: blank line
+Line 3+: 2-3 sentences on why it fits their taste and the season. Do not mention anything they disliked. Be confident and specific.`;
 
-   const res = await fetch("/api/recommend", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
+    const res = await fetch("/api/recommend", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         model: "claude-sonnet-4-20250514",
         max_tokens: 1000,
@@ -365,7 +365,17 @@ Give a specific recommendation — a real beer, wine, or cider with a brewery/wi
               </button>
               {recommendation && (
                 <div style={{ marginTop: 12, background: "#1e1812", border: "1px solid #3a2e1e", borderRadius: 4, padding: "16px" }}>
-                  <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 13, color: "#f0e8d8", lineHeight: 1.7 }}>{recommendation}</div>
+                  {(() => {
+                    const lines = recommendation.split("\n");
+                    const drinkLine = lines[0]?.replace(/\*\*/g, "");
+                    const body = lines.slice(1).filter(l => l.trim()).join(" ");
+                    return (
+                      <>
+                        <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, fontWeight: 700, color: "#e8785a", lineHeight: 1.4, marginBottom: 10 }}>{drinkLine}</div>
+                        <div style={{ fontFamily: "'Georgia', serif", fontSize: 13, color: "#c0b090", lineHeight: 1.7 }}>{body}</div>
+                      </>
+                    );
+                  })()}
                 </div>
               )}
             </div>
