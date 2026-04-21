@@ -402,21 +402,34 @@ Line 3+: 2-3 sentences on why it fits their taste and the season. Do not mention
               ["Brewery / Winery", "Winery/Brewery", "e.g. Sonnen Hill Brewing", [...new Set(allEntries.map(e => e["Winery/Brewery"]).filter(Boolean))].sort()],
               ["Style", "style", "e.g. Saison", [...new Set(allEntries.map(e => e.style).filter(Boolean))].sort()],
               ["Where", "Where", "e.g. Volo, LCBO, Bottle Shop", [...new Set(allEntries.map(e => e.Where).filter(Boolean))].sort()],
-            ].map(([label, field, ph, suggestions]) => (
-              <div key={field} style={{ marginBottom: 10 }}>
-                <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: "#6a5a3a", letterSpacing: 0.5, marginBottom: 4 }}>{label}</div>
-                <input
-                  value={form[field]}
-                  onChange={e => setForm(f => ({ ...f, [field]: e.target.value }))}
-                  placeholder={ph}
-                  list={`list-${field}`}
-                  style={{ width: "100%", background: "#2a2018", border: "1px solid #3a2e1e", borderRadius: 4, padding: "8px 10px", color: "#f0e8d8", fontFamily: "'DM Mono', monospace", fontSize: 12 }}
-                />
-                <datalist id={`list-${field}`}>
-                  {suggestions.map(s => <option key={s} value={s} />)}
-                </datalist>
-              </div>
-            ))}
+            ].map(([label, field, ph, suggestions]) => {
+              const val = form[field] || "";
+              const matches = val.length > 0
+                ? suggestions.filter(s => s.toLowerCase().includes(val.toLowerCase()) && s.toLowerCase() !== val.toLowerCase()).slice(0, 5)
+                : [];
+              return (
+                <div key={field} style={{ marginBottom: 10, position: "relative" }}>
+                  <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: "#6a5a3a", letterSpacing: 0.5, marginBottom: 4 }}>{label}</div>
+                  <input
+                    value={val}
+                    onChange={e => setForm(f => ({ ...f, [field]: e.target.value }))}
+                    placeholder={ph}
+                    autoComplete="off"
+                    style={{ width: "100%", background: "#2a2018", border: "1px solid #3a2e1e", borderRadius: 4, padding: "8px 10px", color: "#f0e8d8", fontFamily: "'DM Mono', monospace", fontSize: 12 }}
+                  />
+                  {matches.length > 0 && (
+                    <div style={{ position: "absolute", top: "100%", left: 0, right: 0, background: "#2a2018", border: "1px solid #4a3a2a", borderTop: "none", borderRadius: "0 0 4px 4px", zIndex: 200, maxHeight: 180, overflowY: "auto" }}>
+                      {matches.map(s => (
+                        <div key={s} onMouseDown={() => setForm(f => ({ ...f, [field]: s }))} style={{ padding: "8px 10px", fontFamily: "'DM Mono', monospace", fontSize: 12, color: "#c0b090", cursor: "pointer", borderBottom: "1px solid #3a2e1e" }}
+                          onMouseEnter={e => e.target.style.background = "#3a2e1e"}
+                          onMouseLeave={e => e.target.style.background = "transparent"}
+                        >{s}</div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
             <div style={{ marginBottom: 20 }}>
               <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: "#6a5a3a", letterSpacing: 0.5, marginBottom: 8 }}>Rating</div>
               <div style={{ display: "flex", gap: 8 }}>
