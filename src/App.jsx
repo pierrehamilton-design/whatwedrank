@@ -244,16 +244,14 @@ Line 3+: 2-3 sentences on why it fits their taste and the season. Do not mention
         input::placeholder { color: #6a5a3a; }
       `}</style>
 
-      <div style={{ borderBottom: "1px solid #3a2e1e", padding: "20px 20px 0", background: "#16110d" }}>
-        <div style={{ maxWidth: 640, margin: "0 auto" }}>
-          <div style={{ marginBottom: 16, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
-            <div style={{ minWidth: 0 }}>
-              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 10, letterSpacing: 3, color: "#8a6a3a", textTransform: "uppercase", marginBottom: 2 }}>A Record Of</div>
-              <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, lineHeight: 1, color: "#f0e8d8", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>What We Drank</h1>
+      <div style={{ borderBottom: "1px solid #3a2e1e", padding: "16px 16px 0", background: "#16110d" }}>
+        <div style={{ maxWidth: 640, margin: "0 auto", width: "100%" }}>
+          <div style={{ marginBottom: 12 }}>
+            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 10, letterSpacing: 3, color: "#8a6a3a", textTransform: "uppercase", marginBottom: 2 }}>A Record Of</div>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 700, lineHeight: 1, color: "#f0e8d8" }}>What We Drank</h1>
+              <button onClick={() => setShowForm(true)} className="add-btn" style={{ background: "#e8785a", color: "#1a1410", border: "none", borderRadius: 4, padding: "7px 12px", fontFamily: "'DM Mono', monospace", fontSize: 12, fontWeight: 500, cursor: "pointer", flexShrink: 0 }}>+ Log</button>
             </div>
-            <button onClick={() => setShowForm(true)} className="add-btn" style={{ background: "#e8785a", color: "#1a1410", border: "none", borderRadius: 4, padding: "8px 12px", fontFamily: "'DM Mono', monospace", fontSize: 12, fontWeight: 500, cursor: "pointer", whiteSpace: "nowrap", flexShrink: 0 }}>
-              + Log
-            </button>
           </div>
           <div style={{ display: "flex" }}>
             {[["journal", "Journal"], ["stats", "Stats"], ["explore", "Explore"]].map(([v, l]) => (
@@ -267,7 +265,7 @@ Line 3+: 2-3 sentences on why it fits their taste and the season. Do not mention
         </div>
       </div>
 
-      <div style={{ maxWidth: 640, margin: "0 auto", padding: "0 20px 80px" }}>
+      <div style={{ maxWidth: 640, margin: "0 auto", padding: "0 16px 80px" }}>
         {view === "journal" && (
           <>
             <div style={{ padding: "16px 0 12px" }}>
