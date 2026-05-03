@@ -326,29 +326,16 @@ Line 3+: 2-3 sentences on why it fits their taste and the season. Do not mention
                           {currYear}
                         </div>
                       )}
-                      <div className="entry-card" onClick={() => setSelectedEntry(e)} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 8px", borderRadius: 4, cursor: "pointer" }}>
-                        <div style={{ width: 32, height: 32, borderRadius: "50%", background: "#2a2018", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, flexShrink: 0 }}>
+                      <div className="entry-card" onClick={() => setSelectedEntry(e)} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 8px", borderRadius: 4, cursor: "pointer" }}>
+                        <div style={{ width: 40, height: 40, borderRadius: "50%", background: "#2a2018", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, flexShrink: 0 }}>
                           {TYPE_EMOJI[type] || "🥂"}
                         </div>
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap" }}>
-                            <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 15, fontWeight: 700, color: "#f0e8d8", overflow: "hidden", textOverflow: "ellipsis", maxWidth: 240 }}>{name}</span>
-                            {e.style && <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: "#6a5a3a" }}>{e.style}</span>}
-                          </div>
-                          <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: "#6a5a3a", marginTop: 2, display: "flex", gap: 8, flexWrap: "wrap" }}>
-                            {brewery && <span>{brewery}</span>}
-                            {where && <><span style={{ color: "#3a2e1e" }}>·</span><span>{where}</span></>}
-                            <span style={{ color: "#3a2e1e" }}>·</span>
-                            <span style={{ color: "#4a3a2a" }}>{who}</span>
-                          </div>
+                          <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 700, color: "#f0e8d8", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{name}</div>
+                          {brewery && <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 14, color: "#6a5a3a", marginTop: 3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{brewery}</div>}
                         </div>
-                        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 2, flexShrink: 0 }}>
-                          <div style={{ width: 24, height: 24, borderRadius: "50%", background: rc.color + "22", border: `1px solid ${rc.color}55`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, color: rc.color, fontFamily: "'DM Mono', monospace", fontWeight: 500 }}>
-                            {rc.emoji}
-                          </div>
-                          <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, color: "#4a3a2a" }}>
-                            {date.split("/").slice(0, 2).join("/")}
-                          </div>
+                        <div style={{ width: 32, height: 32, borderRadius: "50%", background: rc.color + "22", border: `1px solid ${rc.color}55`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, color: rc.color, fontFamily: "'DM Mono', monospace", fontWeight: 500, flexShrink: 0 }}>
+                          {rc.emoji}
                         </div>
                       </div>
                     </div>
