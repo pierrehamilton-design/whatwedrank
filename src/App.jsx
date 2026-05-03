@@ -50,6 +50,43 @@ export default function App() {
   const [recommendation, setRecommendation] = useState("");
   const [recommending, setRecommending] = useState(false);
   const [scanning, setScanning] = useState(false);
+  const [selectedEntry, setSelectedEntry] = useState(null);
+  const [exploreRec, setExploreRec] = useState("");
+  const [exploring, setExploring] = useState(false);
+  const [sliders, setSliders] = useState({ body: 30, char: 25, sweet: 15, bitter: 35 });
+
+  const bodyLabels = ["Light","Light-medium","Medium","Medium-bold","Bold"];
+  const charLabels = ["Crisp","Clean","Complex","Earthy","Funky"];
+  const sweetLabels = ["Bone dry","Dry","Off-dry","Semi-sweet","Sweet"];
+  const bitterLabels = ["Low","Subtle","Moderate","Bitter","Very hoppy"];
+  const getLabel = (labels, val) => labels[Math.min(4, Math.floor(val / 21))];
+
+  const getExploreRec = async () => {
+    setExploring(true);
+    setExploreRec("");
+    const season = getSeason();
+    const prompt = `You are a knowledgeable craft beer and natural wine advisor. Recommend ONE specific drink based on this taste profile.
+
+Body: ${getLabel(bodyLabels, sliders.body)} (${sliders.body}/100)
+Character: ${getLabel(charLabels, sliders.char)} (${sliders.char}/100)
+Sweetness: ${getLabel(sweetLabels, sliders.sweet)} (${sliders.sweet}/100)
+Bitterness: ${getLabel(bitterLabels, sliders.bitter)} (${sliders.bitter}/100)
+Season: ${season}
+
+Respond in exactly this format:
+Line 1: Drink name, brewery/winery, and style only
+Line 2: blank
+Line 3+: 2-3 sentences on why it fits this profile and the season. Be confident and specific.`;
+
+    const res = await fetch("/api/recommend", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 500, messages: [{ role: "user", content: prompt }] }),
+    });
+    const data = await res.json();
+    setExploreRec(data.content?.[0]?.text || "Couldn't get a recommendation.");
+    setExploring(false);
+  };
 
   const scanLabel = async (file) => {
     setScanning(true);
@@ -215,7 +252,7 @@ Line 3+: 2-3 sentences on why it fits their taste and the season. Do not mention
             </button>
           </div>
           <div style={{ display: "flex" }}>
-            {[["journal", "Journal"], ["stats", "Stats"]].map(([v, l]) => (
+            {[["journal", "Journal"], ["stats", "Stats"], ["explore", "Explore"]].map(([v, l]) => (
               <button key={v} className="nav-btn" onClick={() => setView(v)} style={{
                 background: "none", color: view === v ? "#f0e8d8" : "#6a5a3a",
                 padding: "8px 20px", fontSize: 13, letterSpacing: 1, fontFamily: "'DM Mono', monospace",
@@ -289,7 +326,7 @@ Line 3+: 2-3 sentences on why it fits their taste and the season. Do not mention
                           {currYear}
                         </div>
                       )}
-                      <div className="entry-card" style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 8px", borderRadius: 4 }}>
+                      <div className="entry-card" onClick={() => setSelectedEntry(e)} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 8px", borderRadius: 4, cursor: "pointer" }}>
                         <div style={{ width: 32, height: 32, borderRadius: "50%", background: "#2a2018", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, flexShrink: 0 }}>
                           {TYPE_EMOJI[type] || "🥂"}
                         </div>
@@ -411,7 +448,90 @@ Line 3+: 2-3 sentences on why it fits their taste and the season. Do not mention
             </div>
           </div>
         )}
+
+        {view === "explore" && (
+          <div style={{ paddingTop: 24 }}>
+            <div style={{ fontFamily: "'Playfair Display', serif", fontStyle: "italic", fontSize: 13, color: "#8a7a5a", marginBottom: 20 }}>Drag the sliders to describe what you're in the mood for, then get a recommendation.</div>
+
+            {[
+              ["Body", "body", "Light", "Bold", bodyLabels],
+              ["Character", "char", "Crisp", "Funky", charLabels],
+              ["Sweetness", "sweet", "Dry", "Sweet", sweetLabels],
+              ["Bitterness", "bitter", "Low", "Hoppy / tannic", bitterLabels],
+            ].map(([label, key, lo, hi, labels]) => (
+              <div key={key} style={{ marginBottom: 24 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8 }}>
+                  <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: "#8a7a5a", letterSpacing: 0.5 }}>{label}</span>
+                  <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 14, color: "#e8785a" }}>{getLabel(labels, sliders[key])}</span>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: "#4a3a2a", width: 36 }}>{lo}</span>
+                  <input type="range" min="0" max="100" value={sliders[key]}
+                    onChange={e => setSliders(s => ({ ...s, [key]: parseInt(e.target.value) }))}
+                    style={{ flex: 1, accentColor: "#e8785a" }} />
+                  <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: "#4a3a2a", width: 36, textAlign: "right" }}>{hi}</span>
+                </div>
+              </div>
+            ))}
+
+            <button onClick={getExploreRec} disabled={exploring} style={{ width: "100%", background: exploring ? "#2a2018" : "#1e1812", color: exploring ? "#6a5a3a" : "#e8785a", border: "1px solid #e8785a44", borderRadius: 4, padding: "12px", fontFamily: "'DM Mono', monospace", fontSize: 12, letterSpacing: 1, cursor: exploring ? "not-allowed" : "pointer", marginBottom: 16 }}>
+              {exploring ? "Thinking..." : "♥ Find something that matches"}
+            </button>
+
+            {exploreRec && (
+              <div style={{ background: "#1e1812", border: "1px solid #3a2e1e", borderRadius: 4, padding: "16px" }}>
+                {(() => {
+                  const lines = exploreRec.split("\n");
+                  const drinkLine = lines[0]?.replace(/\*\*/g, "");
+                  const body = lines.slice(1).filter(l => l.trim()).join(" ");
+                  return (
+                    <>
+                      <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, fontWeight: 700, color: "#e8785a", lineHeight: 1.4, marginBottom: 10 }}>{drinkLine}</div>
+                      <div style={{ fontFamily: "'Georgia', serif", fontSize: 13, color: "#c0b090", lineHeight: 1.7 }}>{body}</div>
+                    </>
+                  );
+                })()}
+              </div>
+            )}
+          </div>
+        )}
       </div>
+
+      {selectedEntry && (() => {
+        const e = selectedEntry;
+        const rc = RATING_CONFIG[e["Like it or Love it?"]] || RATING_CONFIG["Like"];
+        const date = e.Timestamp?.split(" ")[0] || "";
+        return (
+          <div style={{ position: "fixed", inset: 0, background: "#000000cc", display: "flex", alignItems: "flex-end", zIndex: 100 }} onClick={() => setSelectedEntry(null)}>
+            <div style={{ width: "100%", maxWidth: 640, margin: "0 auto", background: "#1e1812", borderRadius: "12px 12px 0 0", padding: "24px 20px", border: "1px solid #3a2e1e" }} onClick={ev => ev.stopPropagation()}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 }}>
+                <div>
+                  <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, color: "#f0e8d8", lineHeight: 1.2 }}>{e.Drink || e["Winery/Brewery"]}</div>
+                  {e.style && <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: "#6a5a3a", marginTop: 4 }}>{e.style}</div>}
+                </div>
+                <div style={{ width: 36, height: 36, borderRadius: "50%", background: rc.color + "22", border: `1px solid ${rc.color}55`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, color: rc.color, flexShrink: 0 }}>{rc.emoji}</div>
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 16 }}>
+                {[
+                  ["Rating", e["Like it or Love it?"]],
+                  ["Type", e["Whatru Drinking"]],
+                  ["Brewery / Winery", e["Winery/Brewery"]],
+                  ["Style", e.style],
+                  ["Where", e.Where],
+                  ["Who", e["Jess or Pierre"]],
+                  ["Date", date],
+                ].filter(([, v]) => v).map(([label, val]) => (
+                  <div key={label} style={{ background: "#2a2018", borderRadius: 4, padding: "10px 12px" }}>
+                    <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: "#5a4a2a", letterSpacing: 0.5, marginBottom: 3 }}>{label}</div>
+                    <div style={{ fontFamily: "'Georgia', serif", fontSize: 13, color: "#c0b090" }}>{val}</div>
+                  </div>
+                ))}
+              </div>
+              <button onClick={() => setSelectedEntry(null)} style={{ width: "100%", background: "transparent", color: "#6a5a3a", border: "1px solid #3a2e1e", borderRadius: 4, padding: "10px", fontFamily: "'DM Mono', monospace", fontSize: 12, cursor: "pointer" }}>Close</button>
+            </div>
+          </div>
+        );
+      })()}
 
       {showForm && (
         <div style={{ position: "fixed", inset: 0, background: "#000000cc", display: "flex", alignItems: "flex-end", zIndex: 100 }} onClick={() => setShowForm(false)}>
