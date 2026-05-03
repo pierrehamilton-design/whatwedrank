@@ -64,6 +64,7 @@ export default function App() {
           body: JSON.stringify({ imageBase64: base64, mediaType }),
         });
         const data = await res.json();
+        alert("Scan result: " + JSON.stringify(data));
         setForm(f => ({
           ...f,
           Drink: data.name || f.Drink,
@@ -72,7 +73,7 @@ export default function App() {
           "Whatru Drinking": data.type || f["Whatru Drinking"],
         }));
       } catch (err) {
-        console.error("Scan failed", err);
+        alert("Scan error: " + err.message);
       }
       setScanning(false);
     };
