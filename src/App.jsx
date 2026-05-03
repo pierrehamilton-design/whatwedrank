@@ -246,14 +246,14 @@ Line 3+: 2-3 sentences on why it fits their taste and the season. Do not mention
 
       <div style={{ borderBottom: "1px solid #3a2e1e", padding: "20px 20px 0", background: "#16110d" }}>
         <div style={{ maxWidth: 640, margin: "0 auto" }}>
-          <div style={{ marginBottom: 16 }}>
-            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 11, letterSpacing: 4, color: "#8a6a3a", textTransform: "uppercase", marginBottom: 4 }}>A Record Of</div>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 26, fontWeight: 700, lineHeight: 1, color: "#f0e8d8" }}>What We Drank</h1>
-              <button onClick={() => setShowForm(true)} className="add-btn" style={{ background: "#e8785a", color: "#1a1410", border: "none", borderRadius: 4, padding: "8px 14px", fontFamily: "'DM Mono', monospace", fontSize: 12, fontWeight: 500, letterSpacing: 0.5, cursor: "pointer", whiteSpace: "nowrap", flexShrink: 0, marginLeft: 12 }}>
-                + Log Drink
-              </button>
+          <div style={{ marginBottom: 16, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 10, letterSpacing: 3, color: "#8a6a3a", textTransform: "uppercase", marginBottom: 2 }}>A Record Of</div>
+              <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, lineHeight: 1, color: "#f0e8d8", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>What We Drank</h1>
             </div>
+            <button onClick={() => setShowForm(true)} className="add-btn" style={{ background: "#e8785a", color: "#1a1410", border: "none", borderRadius: 4, padding: "8px 12px", fontFamily: "'DM Mono', monospace", fontSize: 12, fontWeight: 500, cursor: "pointer", whiteSpace: "nowrap", flexShrink: 0 }}>
+              + Log
+            </button>
           </div>
           <div style={{ display: "flex" }}>
             {[["journal", "Journal"], ["stats", "Stats"], ["explore", "Explore"]].map(([v, l]) => (
@@ -493,8 +493,8 @@ Line 3+: 2-3 sentences on why it fits their taste and the season. Do not mention
         const rc = RATING_CONFIG[e["Like it or Love it?"]] || RATING_CONFIG["Like"];
         const date = e.Timestamp?.split(" ")[0] || "";
         return (
-          <div style={{ position: "fixed", inset: 0, background: "#000000cc", display: "flex", alignItems: "flex-end", zIndex: 100 }} onClick={() => setSelectedEntry(null)}>
-            <div style={{ width: "100%", maxWidth: 640, margin: "0 auto", background: "#1e1812", borderRadius: "12px 12px 0 0", padding: "24px 20px", border: "1px solid #3a2e1e" }} onClick={ev => ev.stopPropagation()}>
+          <div style={{ position: "fixed", inset: 0, background: "#000000cc", display: "flex", alignItems: "flex-end", zIndex: 100, overflowY: "auto" }} onClick={() => setSelectedEntry(null)}>
+            <div style={{ width: "100%", maxWidth: 640, margin: "0 auto", background: "#1e1812", borderRadius: "12px 12px 0 0", padding: "24px 20px", border: "1px solid #3a2e1e", maxHeight: "90vh", overflowY: "auto" }} onClick={ev => ev.stopPropagation()}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 }}>
                 <div>
                   <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, color: "#f0e8d8", lineHeight: 1.2 }}>{e.Drink || e["Winery/Brewery"]}</div>
