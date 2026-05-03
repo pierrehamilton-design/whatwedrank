@@ -24,6 +24,14 @@ const RATING_CONFIG = {
 };
 
 const TYPE_EMOJI = { Beer: "🍺", Wine: "🍷", Cider: "🍎" };
+const getTypeEmoji = (type) => {
+  if (!type) return "🥂";
+  const t = type.trim().toLowerCase();
+  if (t === "beer") return "🍺";
+  if (t === "wine") return "🍷";
+  if (t === "cider") return "🍎";
+  return "🥂";
+};
 
 const EMPTY_FORM = {
   Timestamp: "",
@@ -330,7 +338,7 @@ Line 3+: 2-3 sentences on why it fits their taste and the season. Do not mention
                       )}
                       <div className="entry-card" onClick={() => setSelectedEntry(e)} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 8px", borderRadius: 4, cursor: "pointer" }}>
                         <div style={{ width: 40, height: 40, borderRadius: "50%", background: "#2a2018", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, flexShrink: 0 }}>
-                          {TYPE_EMOJI[type] || "🥂"}
+                          {getTypeEmoji(type)}
                         </div>
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 700, color: "#f0e8d8", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{name}</div>
