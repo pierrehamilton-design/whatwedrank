@@ -34,6 +34,10 @@ const EMPTY_FORM = {
   style: "",
   Where: "",
   "Like it or Love it?": "Love",
+  taste_body: 50,
+  taste_char: 50,
+  taste_sweet: 50,
+  taste_bitter: 50,
 };
 
 export default function App() {
@@ -514,6 +518,27 @@ Line 3+: 2-3 sentences on why it fits their taste and the season. Do not mention
                   </div>
                 ))}
               </div>
+              {(e.taste_body || e.taste_char || e.taste_sweet || e.taste_bitter) && (
+                <div style={{ marginBottom: 16 }}>
+                  <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: "#5a4a2a", letterSpacing: 0.5, marginBottom: 10 }}>Taste Profile</div>
+                  {[
+                    ["Body", "taste_body", bodyLabels],
+                    ["Character", "taste_char", charLabels],
+                    ["Sweetness", "taste_sweet", sweetLabels],
+                    ["Bitterness", "taste_bitter", bitterLabels],
+                  ].filter(([, key]) => e[key]).map(([label, key, labels]) => (
+                    <div key={key} style={{ marginBottom: 10 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                        <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: "#5a4a2a" }}>{label}</span>
+                        <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: "#e8785a" }}>{getLabel(labels, parseInt(e[key]))}</span>
+                      </div>
+                      <div style={{ height: 4, background: "#2a2018", borderRadius: 2, overflow: "hidden" }}>
+                        <div style={{ height: "100%", width: `${e[key]}%`, background: "#e8785a44", borderRadius: 2 }} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
               <button onClick={() => setSelectedEntry(null)} style={{ width: "100%", background: "transparent", color: "#6a5a3a", border: "1px solid #3a2e1e", borderRadius: 4, padding: "10px", fontFamily: "'DM Mono', monospace", fontSize: 12, cursor: "pointer" }}>Close</button>
             </div>
           </div>
@@ -586,6 +611,29 @@ Line 3+: 2-3 sentences on why it fits their taste and the season. Do not mention
                   }}>{cfg.emoji}<br />{r}</button>
                 ))}
               </div>
+            </div>
+            <div style={{ marginBottom: 20 }}>
+              <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: "#6a5a3a", letterSpacing: 0.5, marginBottom: 12 }}>Taste Profile <span style={{ color: "#3a2e1e" }}>— optional</span></div>
+              {[
+                ["Body", "taste_body", "Light", "Bold", bodyLabels],
+                ["Character", "taste_char", "Crisp", "Funky", charLabels],
+                ["Sweetness", "taste_sweet", "Dry", "Sweet", sweetLabels],
+                ["Bitterness", "taste_bitter", "Low", "Hoppy", bitterLabels],
+              ].map(([label, key, lo, hi, labels]) => (
+                <div key={key} style={{ marginBottom: 14 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                    <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: "#6a5a3a" }}>{label}</span>
+                    <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: "#e8785a" }}>{getLabel(labels, form[key])}</span>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, color: "#3a2e1e", width: 28 }}>{lo}</span>
+                    <input type="range" min="0" max="100" value={form[key]}
+                      onChange={e => setForm(f => ({ ...f, [key]: parseInt(e.target.value) }))}
+                      style={{ flex: 1, accentColor: "#e8785a" }} />
+                    <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, color: "#3a2e1e", width: 28, textAlign: "right" }}>{hi}</span>
+                  </div>
+                </div>
+              ))}
             </div>
             <button onClick={handleAdd} disabled={saving} style={{ width: "100%", background: saving ? "#6a5a3a" : "#e8785a", color: "#1a1410", border: "none", borderRadius: 4, padding: "12px", fontFamily: "'DM Mono', monospace", fontSize: 13, fontWeight: 500, letterSpacing: 1, cursor: saving ? "not-allowed" : "pointer" }}>
               {saving ? "Saving..." : "Save Entry"}
