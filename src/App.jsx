@@ -49,6 +49,35 @@ export default function App() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [recommendation, setRecommendation] = useState("");
   const [recommending, setRecommending] = useState(false);
+  const [scanning, setScanning] = useState(false);
+
+  const scanLabel = async (file) => {
+    setScanning(true);
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const base64 = e.target.result.split(",")[1];
+      const mediaType = file.type || "image/jpeg";
+      try {
+        const res = await fetch("/api/scan", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ imageBase64: base64, mediaType }),
+        });
+        const data = await res.json();
+        setForm(f => ({
+          ...f,
+          Drink: data.name || f.Drink,
+          "Winery/Brewery": data.brewery || f["Winery/Brewery"],
+          style: data.style || f.style,
+          "Whatru Drinking": data.type || f["Whatru Drinking"],
+        }));
+      } catch (err) {
+        console.error("Scan failed", err);
+      }
+      setScanning(false);
+    };
+    reader.readAsDataURL(file);
+  };
 
   const getSeason = () => {
     const m = new Date().getMonth();
@@ -386,7 +415,13 @@ Line 3+: 2-3 sentences on why it fits their taste and the season. Do not mention
       {showForm && (
         <div style={{ position: "fixed", inset: 0, background: "#000000cc", display: "flex", alignItems: "flex-end", zIndex: 100 }} onClick={() => setShowForm(false)}>
           <div style={{ width: "100%", maxWidth: 640, margin: "0 auto", background: "#1e1812", borderRadius: "12px 12px 0 0", padding: "24px 20px", border: "1px solid #3a2e1e" }} onClick={e => e.stopPropagation()}>
-            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 700, marginBottom: 20, color: "#f0e8d8" }}>Log a Drink</div>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 700, color: "#f0e8d8" }}>Log a Drink</div>
+              <label style={{ display: "flex", alignItems: "center", gap: 6, background: "#2a2018", border: "1px solid #4a3a2a", borderRadius: 4, padding: "7px 12px", cursor: "pointer", fontFamily: "'DM Mono', monospace", fontSize: 11, color: scanning ? "#6a5a3a" : "#c0b090", letterSpacing: 0.5 }}>
+                {scanning ? "Scanning..." : "📷 Scan Label"}
+                <input type="file" accept="image/*" capture="environment" onChange={e => e.target.files[0] && scanLabel(e.target.files[0])} style={{ display: "none" }} />
+              </label>
+            </div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
               {[["Who", "Jess or Pierre", ["Pierre", "Jess"]], ["Type", "Whatru Drinking", ["Beer", "Wine", "Cider"]]].map(([label, field, opts]) => (
                 <div key={field}>
