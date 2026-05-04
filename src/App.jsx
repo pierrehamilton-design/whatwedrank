@@ -113,7 +113,6 @@ Line 3+: 2-3 sentences on why it fits this profile and the season. Be confident 
           body: JSON.stringify({ imageBase64: base64, mediaType }),
         });
         const data = await res.json();
-        alert("Scan result: " + JSON.stringify(data));
         setForm(f => ({
           ...f,
           Drink: data.name || f.Drink,
@@ -233,7 +232,7 @@ Line 3+: 2-3 sentences on why it fits their taste and the season. Do not mention
   };
 
   return (
-    <div style={{ minHeight: "100vh", background: "#1a1410", color: "#f0e8d8", fontFamily: "'Georgia', serif", overflowX: "hidden", width: "100%" }}>
+    <div style={{ minHeight: "100vh", background: "#1a1410", color: "#f0e8d8", fontFamily: "'Georgia', serif" }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Mono:wght@400;500&display=swap');
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -250,15 +249,14 @@ Line 3+: 2-3 sentences on why it fits their taste and the season. Do not mention
         .add-btn:hover { transform: scale(1.05); }
         input, select { outline: none; }
         input::placeholder { color: #6a5a3a; }
+        html, body { overflow-x: hidden; max-width: 100vw; }
       `}</style>
 
       <div style={{ background: "#16110d", borderBottom: "1px solid #3a2e1e" }}>
         <div style={{ padding: "12px 16px 0" }}>
           <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, letterSpacing: 3, color: "#8a6a3a", textTransform: "uppercase", marginBottom: 4 }}>A Record Of</div>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
-            <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, lineHeight: 1, color: "#f0e8d8", flex: 1 }}>What We Drank</h1>
-            <button onClick={() => setShowForm(true)} style={{ background: "#e8785a", color: "#1a1410", border: "none", borderRadius: 4, padding: "8px 14px", fontFamily: "'DM Mono', monospace", fontSize: 13, fontWeight: 500, cursor: "pointer", whiteSpace: "nowrap" }}>+ Log</button>
-          </div>
+          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, lineHeight: 1, color: "#f0e8d8", marginBottom: 10 }}>What We Drank</h1>
+          <button onClick={() => setShowForm(true)} style={{ background: "#e8785a", color: "#1a1410", border: "none", borderRadius: 4, padding: "8px 16px", fontFamily: "'DM Mono', monospace", fontSize: 13, fontWeight: 500, cursor: "pointer", width: "100%", marginBottom: 12 }}>+ Log a Drink</button>
           <div style={{ display: "flex", gap: 0 }}>
             {[["journal", "Journal"], ["stats", "Stats"], ["explore", "Explore"]].map(([v, l]) => (
               <button key={v} onClick={() => setView(v)} style={{
@@ -497,8 +495,8 @@ Line 3+: 2-3 sentences on why it fits their taste and the season. Do not mention
         const rc = RATING_CONFIG[e["Like it or Love it?"]] || RATING_CONFIG["Like"];
         const date = e.Timestamp?.split(" ")[0] || "";
         return (
-          <div style={{ position: "fixed", inset: 0, background: "#000000cc", zIndex: 100, overflowY: "auto", padding: "20px 16px" }} onClick={() => setSelectedEntry(null)}>
-            <div style={{ width: "100%", maxWidth: 480, margin: "0 auto", background: "#1e1812", borderRadius: 8, padding: "24px 20px", border: "1px solid #3a2e1e" }} onClick={ev => ev.stopPropagation()}>
+          <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "#000000cc", zIndex: 100, overflowY: "auto" }} onClick={() => setSelectedEntry(null)}>
+            <div style={{ background: "#1e1812", borderRadius: 8, padding: "24px 20px", border: "1px solid #3a2e1e", margin: "60px 16px 20px" }} onClick={ev => ev.stopPropagation()}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 }}>
                 <div>
                   <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, color: "#f0e8d8", lineHeight: 1.2 }}>{e.Drink || e["Winery/Brewery"]}</div>
@@ -550,8 +548,8 @@ Line 3+: 2-3 sentences on why it fits their taste and the season. Do not mention
       })()}
 
       {showForm && (
-        <div style={{ position: "fixed", inset: 0, background: "#000000cc", display: "flex", alignItems: "flex-end", zIndex: 100 }} onClick={() => setShowForm(false)}>
-          <div style={{ width: "100%", maxWidth: 640, margin: "0 auto", background: "#1e1812", borderRadius: "12px 12px 0 0", padding: "24px 20px", border: "1px solid #3a2e1e", maxHeight: "90vh", overflowY: "auto" }} onClick={e => e.stopPropagation()}>
+        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "#000000cc", zIndex: 100, overflowY: "auto" }} onClick={() => setShowForm(false)}>
+          <div style={{ background: "#1e1812", borderRadius: 8, padding: "24px 20px", border: "1px solid #3a2e1e", margin: "60px 16px 20px" }} onClick={e => e.stopPropagation()}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
               <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 700, color: "#f0e8d8" }}>Log a Drink</div>
               <label style={{ display: "flex", alignItems: "center", gap: 6, background: "#2a2018", border: "1px solid #4a3a2a", borderRadius: 4, padding: "7px 12px", cursor: "pointer", fontFamily: "'DM Mono', monospace", fontSize: 11, color: scanning ? "#6a5a3a" : "#c0b090", letterSpacing: 0.5 }}>
