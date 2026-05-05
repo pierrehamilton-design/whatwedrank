@@ -232,7 +232,7 @@ Line 3+: 2-3 sentences on why it fits their taste and the season. Do not mention
   };
 
   return (
-    <div style={{ minHeight: "100vh", background: "#1a1410", color: "#f0e8d8", fontFamily: "'Georgia', serif" }}>
+    <div style={{ minHeight: "100vh", background: "#1a1410", color: "#f0e8d8", fontFamily: "'Georgia', serif", maxWidth: "100vw", overflowX: "hidden" }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Mono:wght@400;500&display=swap');
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -252,12 +252,14 @@ Line 3+: 2-3 sentences on why it fits their taste and the season. Do not mention
         html, body { overflow-x: hidden; max-width: 100vw; }
       `}</style>
 
-      <div style={{ background: "#16110d", borderBottom: "1px solid #3a2e1e", boxSizing: "border-box", width: "100%", overflow: "hidden" }}>
+      <div style={{ background: "#16110d", borderBottom: "1px solid #3a2e1e", width: "100%", maxWidth: "100vw", boxSizing: "border-box" }}>
         <div style={{ padding: "12px 16px 0", boxSizing: "border-box", width: "100%" }}>
           <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, letterSpacing: 3, color: "#8a6a3a", textTransform: "uppercase", marginBottom: 4 }}>A Record Of</div>
-          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, lineHeight: 1, color: "#f0e8d8", marginBottom: 10 }}>What We Drank</h1>
-          <button onClick={() => setShowForm(true)} style={{ background: "#e8785a", color: "#1a1410", border: "none", borderRadius: 4, padding: "8px 16px", fontFamily: "'DM Mono', monospace", fontSize: 13, fontWeight: 500, cursor: "pointer", width: "100%", marginBottom: 12, boxSizing: "border-box" }}>+ Log a Drink</button>
-          <div style={{ display: "flex", gap: 0 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 12 }}>
+            <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, lineHeight: 1, color: "#f0e8d8", margin: 0, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>What We Drank</h1>
+            <button onClick={() => setShowForm(true)} style={{ background: "#e8785a", color: "#1a1410", border: "none", borderRadius: 4, padding: "8px 14px", fontFamily: "'DM Mono', monospace", fontSize: 13, fontWeight: 500, cursor: "pointer", flexShrink: 0, whiteSpace: "nowrap" }}>+ Log</button>
+          </div>
+          <div style={{ display: "flex" }}>
             {[["journal", "Journal"], ["stats", "Stats"], ["explore", "Explore"]].map(([v, l]) => (
               <button key={v} onClick={() => setView(v)} style={{
                 background: "none", border: "none", color: view === v ? "#f0e8d8" : "#6a5a3a",
