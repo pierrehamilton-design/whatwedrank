@@ -87,6 +87,78 @@ export default function App() {
   const bitterLabels = ["Low","Subtle","Moderate","Bitter","Very hoppy"];
   const getLabel = (labels, val) => labels[Math.min(4, Math.floor(val / 21))];
 
+  const [showScanner, setShowScanner] = useState(false);
+  const [scannerReady, setScannerReady] = useState(false);
+
+  const startBarcodeScanner = () => {
+    setShowScanner(true);
+  };
+
+  const stopBarcodeScanner = () => {
+    setShowScanner(false);
+    setScannerReady(false);
+    if (window.Quagga) window.Quagga.stop();
+  };
+
+  const lookupBarcode = async (code) => {
+    stopBarcodeScanner();
+    setScanning(true);
+    try {
+      // Try Open Food Facts first
+      const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${code}.json`);
+      const data = await res.json();
+      if (data.status === 1 && data.product) {
+        const p = data.product;
+        const name = p.product_name || "";
+        const brand = p.brands || "";
+        const categories = (p.categories || "").toLowerCase();
+        let type = "Beer";
+        if (categories.includes("wine")) type = "Wine";
+        else if (categories.includes("cider")) type = "Cider";
+        setForm(f => ({
+          ...f,
+          Drink: name || f.Drink,
+          "Winery/Brewery": brand || f["Winery/Brewery"],
+          "Whatru Drinking": type,
+        }));
+        setScanning(false);
+        return;
+      }
+    } catch (err) {
+      console.log("Barcode lookup failed, trying label scan");
+    }
+    // Fallback: prompt user to take a photo for label scan
+    setScanning(false);
+    alert("Barcode not found in database. Use 📷 Scan Label to read the label instead.");
+  };
+
+  useEffect(() => {
+    if (!showScanner) return;
+    const script = document.createElement("script");
+    script.src = "https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js";
+    script.onload = () => {
+      setScannerReady(true);
+      window.Quagga.init({
+        inputStream: {
+          name: "Live",
+          type: "LiveStream",
+          target: document.getElementById("barcode-scanner"),
+          constraints: { facingMode: "environment" },
+        },
+        decoder: { readers: ["ean_reader", "ean_8_reader", "upc_reader", "upc_e_reader"] },
+      }, (err) => {
+        if (err) { console.error(err); stopBarcodeScanner(); return; }
+        window.Quagga.start();
+        window.Quagga.onDetected((result) => {
+          const code = result.codeResult.code;
+          if (code) lookupBarcode(code);
+        });
+      });
+    };
+    document.head.appendChild(script);
+    return () => { if (window.Quagga) window.Quagga.stop(); };
+  }, [showScanner]);
+
   const getSeason = () => {
     const m = new Date().getMonth();
     if (m >= 2 && m <= 4) return "spring";
@@ -521,6 +593,18 @@ Line 3+: 2-3 sentences on why it fits their taste and the season. Do not mention
         )}
       </div>
 
+      {/* Barcode scanner overlay */}
+      {showScanner && (
+        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "#000", zIndex: 200 }}>
+          <div id="barcode-scanner" style={{ width: "100%", height: "100%" }} />
+          <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
+            <div style={{ width: 260, height: 160, border: "2px solid #e8785a", borderRadius: 8, boxShadow: "0 0 0 9999px rgba(0,0,0,0.5)" }} />
+            <div style={{ marginTop: 16, fontFamily: "'DM Mono', monospace", fontSize: 13, color: "#f0e8d8", letterSpacing: 0.5 }}>Point at barcode</div>
+          </div>
+          <button onClick={stopBarcodeScanner} style={{ position: "absolute", top: 20, right: 20, background: "#e8785a", color: "#1a1410", border: "none", borderRadius: 4, padding: "8px 16px", fontFamily: "'DM Mono', monospace", fontSize: 13, fontWeight: 500, cursor: "pointer", pointerEvents: "all", zIndex: 201 }}>Cancel</button>
+        </div>
+      )}
+
       {/* Entry detail modal */}
       {selectedEntry && (() => {
         const e = selectedEntry;
@@ -585,10 +669,15 @@ Line 3+: 2-3 sentences on why it fits their taste and the season. Do not mention
           <div style={{ background: "#1e1812", borderRadius: 8, padding: "24px 20px", border: "1px solid #3a2e1e", margin: "60px 16px 20px" }} onClick={e => e.stopPropagation()}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
               <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 700, color: "#f0e8d8" }}>Log a Drink</div>
-              <label style={{ display: "flex", alignItems: "center", gap: 6, background: "#2a2018", border: "1px solid #4a3a2a", borderRadius: 4, padding: "7px 12px", cursor: "pointer", fontFamily: "'DM Mono', monospace", fontSize: 11, color: scanning ? "#6a5a3a" : "#c0b090", letterSpacing: 0.5 }}>
-                {scanning ? "Scanning..." : "📷 Scan Label"}
-                <input type="file" accept="image/*" capture="environment" onChange={e => e.target.files[0] && scanLabel(e.target.files[0])} style={{ display: "none" }} />
-              </label>
+              <div style={{ display: "flex", gap: 6 }}>
+                <button onClick={startBarcodeScanner} disabled={scanning} style={{ background: "#2a2018", border: "1px solid #4a3a2a", borderRadius: 4, padding: "7px 10px", cursor: "pointer", fontFamily: "'DM Mono', monospace", fontSize: 11, color: scanning ? "#6a5a3a" : "#c0b090" }}>
+                  {scanning ? "..." : "📊 Barcode"}
+                </button>
+                <label style={{ display: "flex", alignItems: "center", gap: 4, background: "#2a2018", border: "1px solid #4a3a2a", borderRadius: 4, padding: "7px 10px", cursor: "pointer", fontFamily: "'DM Mono', monospace", fontSize: 11, color: scanning ? "#6a5a3a" : "#c0b090" }}>
+                  {scanning ? "Scanning..." : "📷 Label"}
+                  <input type="file" accept="image/*" capture="environment" onChange={e => e.target.files[0] && scanLabel(e.target.files[0])} style={{ display: "none" }} />
+                </label>
+              </div>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
               {[["Who", "Jess or Pierre", ["Pierre", "Jess"]], ["Type", "Whatru Drinking", ["Beer", "Wine", "Cider"]]].map(([label, field, opts]) => (
@@ -607,9 +696,9 @@ Line 3+: 2-3 sentences on why it fits their taste and the season. Do not mention
               ["Where", "Where", "e.g. Volo, LCBO, Bottle Shop", [...new Set(allEntries.map(e => e.Where).filter(Boolean))].sort()],
             ].map(([label, field, ph, suggestions]) => {
               const val = form[field] || "";
-              // prefix-only match — only show suggestions that START with what you typed
-              const matches = val.length > 0
-                ? suggestions.filter(s => s.toLowerCase().startsWith(val.toLowerCase()) && s.toLowerCase() !== val.toLowerCase()).slice(0, 5)
+              // prefix-only match — hide if exact match already selected
+              const matches = val.length > 0 && !suggestions.some(s => s.toLowerCase() === val.toLowerCase())
+                ? suggestions.filter(s => s.toLowerCase().startsWith(val.toLowerCase())).slice(0, 5)
                 : [];
               return (
                 <div key={field} style={{ marginBottom: 10, position: "relative" }}>
