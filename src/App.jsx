@@ -66,6 +66,20 @@ export default function App() {
   const [exploreRec, setExploreRec] = useState("");
   const [exploring, setExploring] = useState(false);
   const [sliders, setSliders] = useState({ body: 30, char: 25, sweet: 15, bitter: 35 });
+  const [unlocked, setUnlocked] = useState(() => localStorage.getItem("wwdpin") === "2001");
+  const [pin, setPin] = useState("");
+  const [pinError, setPinError] = useState(false);
+
+  const submitPin = () => {
+    if (pin === "2001") {
+      localStorage.setItem("wwdpin", "2001");
+      setUnlocked(true);
+    } else {
+      setPinError(true);
+      setPin("");
+      setTimeout(() => setPinError(false), 1500);
+    }
+  };
 
   const bodyLabels = ["Light","Light-medium","Medium","Medium-bold","Bold"];
   const charLabels = ["Crisp","Clean","Complex","Earthy","Funky"];
@@ -225,6 +239,31 @@ Line 3+: 2-3 sentences on why it fits their taste and the season. Do not mention
   const selectSuggestion = (field, val) => {
     setForm(f => ({ ...f, [field]: val }));
   };
+
+  if (!unlocked) {
+    return (
+      <div style={{ minHeight: "100vh", background: "#1a1410", display: "flex", alignItems: "center", justifyContent: "center", padding: 24, fontFamily: "'Georgia', serif" }}>
+        <style>{`@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Mono:wght@400;500&display=swap');* { box-sizing: border-box; margin: 0; padding: 0; }`}</style>
+        <div style={{ width: "100%", maxWidth: 320, textAlign: "center" }}>
+          <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, letterSpacing: 3, color: "#8a6a3a", textTransform: "uppercase", marginBottom: 8 }}>A Record Of</div>
+          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 700, color: "#f0e8d8", marginBottom: 32 }}>What We Drank</h1>
+          <input
+            type="password"
+            inputMode="numeric"
+            maxLength={6}
+            value={pin}
+            onChange={e => setPin(e.target.value)}
+            onKeyDown={e => e.key === "Enter" && submitPin()}
+            placeholder="Enter PIN"
+            style={{ width: "100%", background: pinError ? "#3a1a1a" : "#231c12", border: `1px solid ${pinError ? "#e8785a" : "#3a2e1e"}`, borderRadius: 4, padding: "12px 16px", color: "#f0e8d8", fontFamily: "'DM Mono', monospace", fontSize: 20, textAlign: "center", letterSpacing: 8, marginBottom: 12, outline: "none", transition: "all 0.2s" }}
+            autoFocus
+          />
+          {pinError && <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: "#e8785a", marginBottom: 12 }}>Incorrect PIN</div>}
+          <button onClick={submitPin} style={{ width: "100%", background: "#e8785a", color: "#1a1410", border: "none", borderRadius: 4, padding: "12px", fontFamily: "'DM Mono', monospace", fontSize: 13, fontWeight: 500, cursor: "pointer" }}>Unlock</button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ minHeight: "100vh", background: "#1a1410", color: "#f0e8d8", fontFamily: "'Georgia', serif", maxWidth: "100vw", overflowX: "hidden" }}>
