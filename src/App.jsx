@@ -73,6 +73,14 @@ export default function App() {
   const bitterLabels = ["Low","Subtle","Moderate","Bitter","Very hoppy"];
   const getLabel = (labels, val) => labels[Math.min(4, Math.floor(val / 21))];
 
+  const getSeason = () => {
+    const m = new Date().getMonth();
+    if (m >= 2 && m <= 4) return "spring";
+    if (m >= 5 && m <= 7) return "summer";
+    if (m >= 8 && m <= 10) return "autumn";
+    return "winter";
+  };
+
   const getExploreRec = async () => {
     setExploring(true);
     setExploreRec("");
@@ -128,14 +136,6 @@ Line 3+: 2-3 sentences on why it fits this profile and the season. Be confident 
     reader.readAsDataURL(file);
   };
 
-  const getSeason = () => {
-    const m = new Date().getMonth();
-    if (m >= 2 && m <= 4) return "spring";
-    if (m >= 5 && m <= 7) return "summer";
-    if (m >= 8 && m <= 10) return "autumn";
-    return "winter";
-  };
-
   const getRecommendation = async () => {
     setRecommending(true);
     setRecommendation("");
@@ -143,11 +143,6 @@ Line 3+: 2-3 sentences on why it fits this profile and the season. Be confident 
       .filter(e => e["Like it or Love it?"] === "Love")
       .slice(-30)
       .map(e => `${e.Drink || ""} by ${e["Winery/Brewery"] || ""} (${e.style || e["Whatru Drinking"]})`);
-    const neverAgain = [...new Set(
-      allEntries
-        .filter(e => e["Like it or Love it?"] === "Never Again")
-        .map(e => e.style || e["Whatru Drinking"])
-    )];
     const season = getSeason();
     const prompt = `You are a knowledgeable craft beer and natural wine advisor. Based on this person's drink history, suggest ONE specific drink they'd enjoy.
 
@@ -164,11 +159,7 @@ Line 3+: 2-3 sentences on why it fits their taste and the season. Do not mention
     const res = await fetch("/api/recommend", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
-        max_tokens: 1000,
-        messages: [{ role: "user", content: prompt }],
-      }),
+      body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 1000, messages: [{ role: "user", content: prompt }] }),
     });
     const data = await res.json();
     setRecommendation(data.content?.[0]?.text || "Couldn't get a recommendation right now.");
@@ -231,6 +222,10 @@ Line 3+: 2-3 sentences on why it fits their taste and the season. Do not mention
     setSaving(false);
   };
 
+  const selectSuggestion = (field, val) => {
+    setForm(f => ({ ...f, [field]: val }));
+  };
+
   return (
     <div style={{ minHeight: "100vh", background: "#1a1410", color: "#f0e8d8", fontFamily: "'Georgia', serif", maxWidth: "100vw", overflowX: "hidden" }}>
       <style>{`
@@ -241,22 +236,20 @@ Line 3+: 2-3 sentences on why it fits their taste and the season. Do not mention
         ::-webkit-scrollbar-thumb { background: #4a3c28; border-radius: 2px; }
         .entry-card { transition: background 0.15s; }
         .entry-card:hover { background: #2a2018 !important; }
-        .nav-btn { transition: all 0.15s; cursor: pointer; border: none; }
-        .nav-btn:hover { opacity: 0.75; }
         .filter-pill { cursor: pointer; transition: all 0.15s; }
         .filter-pill:hover { opacity: 0.8; }
-        .add-btn { transition: all 0.2s; }
-        .add-btn:hover { transform: scale(1.05); }
         input, select { outline: none; }
         input::placeholder { color: #6a5a3a; }
         html, body { overflow-x: hidden; max-width: 100vw; }
+        .suggestion-item:active { background: #3a2e1e !important; }
       `}</style>
 
-      <div style={{ background: "#16110d", borderBottom: "1px solid #3a2e1e", width: "100%", maxWidth: "100vw", boxSizing: "border-box" }}>
-        <div style={{ padding: "12px 16px 0", boxSizing: "border-box", width: "100%" }}>
+      {/* Header */}
+      <div style={{ background: "#16110d", borderBottom: "1px solid #3a2e1e", width: "100%", boxSizing: "border-box" }}>
+        <div style={{ padding: "12px 16px 0", boxSizing: "border-box" }}>
           <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, letterSpacing: 3, color: "#8a6a3a", textTransform: "uppercase", marginBottom: 4 }}>A Record Of</div>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 12 }}>
-            <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, lineHeight: 1, color: "#f0e8d8", margin: 0, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>What We Drank</h1>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
+            <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, lineHeight: 1, color: "#f0e8d8", margin: 0, flex: 1, minWidth: 0 }}>What We Drank</h1>
             <button onClick={() => setShowForm(true)} style={{ background: "#e8785a", color: "#1a1410", border: "none", borderRadius: 4, padding: "8px 14px", fontFamily: "'DM Mono', monospace", fontSize: 13, fontWeight: 500, cursor: "pointer", flexShrink: 0, whiteSpace: "nowrap" }}>+ Log</button>
           </div>
           <div style={{ display: "flex" }}>
@@ -272,6 +265,8 @@ Line 3+: 2-3 sentences on why it fits their taste and the season. Do not mention
       </div>
 
       <div style={{ maxWidth: 640, margin: "0 auto", padding: "0 16px 80px" }}>
+
+        {/* Journal */}
         {view === "journal" && (
           <>
             <div style={{ padding: "16px 0 12px" }}>
@@ -321,8 +316,6 @@ Line 3+: 2-3 sentences on why it fits their taste and the season. Do not mention
                   const type = e["Whatru Drinking"];
                   const name = e.Drink || e["Winery/Brewery"];
                   const brewery = e["Winery/Brewery"];
-                  const where = e.Where;
-                  const who = e["Jess or Pierre"];
                   const date = e.Timestamp?.split(" ")[0] || "";
                   const currYear = date.split("/")[2];
                   const prevYear = filtered[i - 1]?.Timestamp?.split(" ")[0]?.split("/")[2];
@@ -354,6 +347,7 @@ Line 3+: 2-3 sentences on why it fits their taste and the season. Do not mention
           </>
         )}
 
+        {/* Stats */}
         {view === "stats" && (
           <div style={{ paddingTop: 24 }}>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: 24 }}>
@@ -391,7 +385,7 @@ Line 3+: 2-3 sentences on why it fits their taste and the season. Do not mention
                 );
               })}
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 24 }}>
               <div>
                 <div style={{ fontFamily: "'Playfair Display', serif", fontStyle: "italic", fontSize: 13, color: "#8a7a5a", marginBottom: 10 }}>Top Breweries</div>
                 {stats.topBreweries.map(([name, count], i) => (
@@ -413,15 +407,13 @@ Line 3+: 2-3 sentences on why it fits their taste and the season. Do not mention
                 ))}
               </div>
             </div>
-            {/* Recommendation */}
-            <div style={{ marginTop: 24, borderTop: "1px solid #2a2018", paddingTop: 24 }}>
+            <div style={{ borderTop: "1px solid #2a2018", paddingTop: 24 }}>
               <div style={{ fontFamily: "'Playfair Display', serif", fontStyle: "italic", fontSize: 13, color: "#8a7a5a", marginBottom: 12 }}>Feeling Adventurous?</div>
               <button onClick={getRecommendation} disabled={recommending} style={{
                 width: "100%", background: recommending ? "#2a2018" : "#1e1812",
                 color: recommending ? "#6a5a3a" : "#e8785a", border: "1px solid #e8785a44",
                 borderRadius: 4, padding: "12px", fontFamily: "'DM Mono', monospace",
                 fontSize: 12, letterSpacing: 1, cursor: recommending ? "not-allowed" : "pointer",
-                transition: "all 0.2s"
               }}>
                 {recommending ? "Thinking..." : "♥ Recommend Something"}
               </button>
@@ -444,10 +436,10 @@ Line 3+: 2-3 sentences on why it fits their taste and the season. Do not mention
           </div>
         )}
 
+        {/* Explore */}
         {view === "explore" && (
           <div style={{ paddingTop: 24 }}>
             <div style={{ fontFamily: "'Playfair Display', serif", fontStyle: "italic", fontSize: 13, color: "#8a7a5a", marginBottom: 20 }}>Drag the sliders to describe what you're in the mood for, then get a recommendation.</div>
-
             {[
               ["Body", "body", "Light", "Bold", bodyLabels],
               ["Character", "char", "Crisp", "Funky", charLabels],
@@ -468,11 +460,9 @@ Line 3+: 2-3 sentences on why it fits their taste and the season. Do not mention
                 </div>
               </div>
             ))}
-
             <button onClick={getExploreRec} disabled={exploring} style={{ width: "100%", background: exploring ? "#2a2018" : "#1e1812", color: exploring ? "#6a5a3a" : "#e8785a", border: "1px solid #e8785a44", borderRadius: 4, padding: "12px", fontFamily: "'DM Mono', monospace", fontSize: 12, letterSpacing: 1, cursor: exploring ? "not-allowed" : "pointer", marginBottom: 16 }}>
               {exploring ? "Thinking..." : "♥ Find something that matches"}
             </button>
-
             {exploreRec && (
               <div style={{ background: "#1e1812", border: "1px solid #3a2e1e", borderRadius: 4, padding: "16px" }}>
                 {(() => {
@@ -492,6 +482,7 @@ Line 3+: 2-3 sentences on why it fits their taste and the season. Do not mention
         )}
       </div>
 
+      {/* Entry detail modal */}
       {selectedEntry && (() => {
         const e = selectedEntry;
         const rc = RATING_CONFIG[e["Like it or Love it?"]] || RATING_CONFIG["Like"];
@@ -500,7 +491,7 @@ Line 3+: 2-3 sentences on why it fits their taste and the season. Do not mention
           <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "#000000cc", zIndex: 100, overflowY: "auto" }} onClick={() => setSelectedEntry(null)}>
             <div style={{ background: "#1e1812", borderRadius: 8, padding: "24px 20px", border: "1px solid #3a2e1e", margin: "60px 16px 20px" }} onClick={ev => ev.stopPropagation()}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 }}>
-                <div>
+                <div style={{ flex: 1, minWidth: 0, paddingRight: 12 }}>
                   <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, color: "#f0e8d8", lineHeight: 1.2 }}>{e.Drink || e["Winery/Brewery"]}</div>
                   {e.style && <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: "#6a5a3a", marginTop: 4 }}>{e.style}</div>}
                 </div>
@@ -549,6 +540,7 @@ Line 3+: 2-3 sentences on why it fits their taste and the season. Do not mention
         );
       })()}
 
+      {/* Log form modal */}
       {showForm && (
         <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "#000000cc", zIndex: 100, overflowY: "auto" }} onClick={() => setShowForm(false)}>
           <div style={{ background: "#1e1812", borderRadius: 8, padding: "24px 20px", border: "1px solid #3a2e1e", margin: "60px 16px 20px" }} onClick={e => e.stopPropagation()}>
@@ -576,8 +568,9 @@ Line 3+: 2-3 sentences on why it fits their taste and the season. Do not mention
               ["Where", "Where", "e.g. Volo, LCBO, Bottle Shop", [...new Set(allEntries.map(e => e.Where).filter(Boolean))].sort()],
             ].map(([label, field, ph, suggestions]) => {
               const val = form[field] || "";
+              // prefix-only match — only show suggestions that START with what you typed
               const matches = val.length > 0
-                ? suggestions.filter(s => s.toLowerCase().includes(val.toLowerCase()) && s.toLowerCase() !== val.toLowerCase()).slice(0, 5)
+                ? suggestions.filter(s => s.toLowerCase().startsWith(val.toLowerCase()) && s.toLowerCase() !== val.toLowerCase()).slice(0, 5)
                 : [];
               return (
                 <div key={field} style={{ marginBottom: 10, position: "relative" }}>
@@ -590,11 +583,14 @@ Line 3+: 2-3 sentences on why it fits their taste and the season. Do not mention
                     style={{ width: "100%", background: "#2a2018", border: "1px solid #3a2e1e", borderRadius: 4, padding: "8px 10px", color: "#f0e8d8", fontFamily: "'DM Mono', monospace", fontSize: 12 }}
                   />
                   {matches.length > 0 && (
-                    <div style={{ position: "absolute", top: "100%", left: 0, right: 0, background: "#2a2018", border: "1px solid #4a3a2a", borderTop: "none", borderRadius: "0 0 4px 4px", zIndex: 200, maxHeight: 180, overflowY: "auto" }}>
+                    <div style={{ position: "absolute", top: "100%", left: 0, right: 0, background: "#2a2018", border: "1px solid #4a3a2a", borderTop: "none", borderRadius: "0 0 4px 4px", zIndex: 200, maxHeight: 160, overflowY: "auto" }}>
                       {matches.map(s => (
-                        <div key={s} onMouseDown={() => setForm(f => ({ ...f, [field]: s }))} style={{ padding: "8px 10px", fontFamily: "'DM Mono', monospace", fontSize: 12, color: "#c0b090", cursor: "pointer", borderBottom: "1px solid #3a2e1e" }}
-                          onMouseEnter={e => e.target.style.background = "#3a2e1e"}
-                          onMouseLeave={e => e.target.style.background = "transparent"}
+                        <div
+                          key={s}
+                          className="suggestion-item"
+                          onMouseDown={ev => { ev.preventDefault(); selectSuggestion(field, s); }}
+                          onTouchEnd={ev => { ev.preventDefault(); selectSuggestion(field, s); }}
+                          style={{ padding: "10px 12px", fontFamily: "'DM Mono', monospace", fontSize: 12, color: "#c0b090", cursor: "pointer", borderBottom: "1px solid #3a2e1e" }}
                         >{s}</div>
                       ))}
                     </div>
