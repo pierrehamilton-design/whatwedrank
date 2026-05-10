@@ -566,6 +566,7 @@ Line 3+: 2-3 sentences on why it fits their taste and the season. Do not mention
                   <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: "#4a3a2a", width: 36 }}>{lo}</span>
                   <input type="range" min="0" max="100" value={sliders[key]}
                     onChange={e => setSliders(s => ({ ...s, [key]: parseInt(e.target.value) }))}
+                    onTouchStart={() => document.activeElement?.blur()}
                     style={{ flex: 1, accentColor: "#e8785a" }} />
                   <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: "#4a3a2a", width: 36, textAlign: "right" }}>{hi}</span>
                 </div>
@@ -757,6 +758,7 @@ Line 3+: 2-3 sentences on why it fits their taste and the season. Do not mention
                     <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, color: "#3a2e1e", width: 28 }}>{lo}</span>
                     <input type="range" min="0" max="100" value={form[key]}
                       onChange={e => setForm(f => ({ ...f, [key]: parseInt(e.target.value) }))}
+                      onTouchStart={() => document.activeElement?.blur()}
                       style={{ flex: 1, accentColor: "#e8785a" }} />
                     <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, color: "#3a2e1e", width: 28, textAlign: "right" }}>{hi}</span>
                   </div>
